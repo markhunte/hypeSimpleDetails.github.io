@@ -1,1 +1,0 @@
-# hypeSimpleDetails.github.io.
