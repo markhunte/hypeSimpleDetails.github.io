@@ -1,1 +1,1 @@
-# https://hypeSimpleDetails.github.io/index.html
+# https://hypesimpledetails.github.io/index.html
