@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+  <head>
+	<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+	<meta http-equiv="X-UA-Compatible" content="chrome=1,IE=edge" />
+	<title>index</title>
+	<style>
+		html {
+			height:100%;
+		}
+		body {
+			background-color:#FFF;
+			margin:0;
+			height:100%;
+		}
+	</style>
+	<!-- copy these lines to your document head: -->
+
+	<meta name="viewport" content="user-scalable=yes, width=1200" />
+	<link href='https://fonts.googleapis.com/css?family=Martian+Mono&subset=latin' rel='stylesheet' type='text/css'>
+	<link href='https://fonts.googleapis.com/css?family=Space+Mono&subset=latin' rel='stylesheet' type='text/css'>
+	
+	
+		
+	<script>
+	
+//== The name of your description loader function in hype functions.
+var My_Description_Function_Name = 'loadDisclosures'
+	
+/*== Convenience function to call your description loader function on all scene loads. */
+function loadDesc(hypeDocument, element, event) {hypeDocument.functions()[My_Description_Function_Name](hypeDocument, element, event);return true;} if ("HYPE_eventListeners" in window === false) {window.HYPE_eventListeners = Array();}window.HYPE_eventListeners.push({ "type": "HypeSceneLoad", "callback": loadDesc });
+</script>
+
+<script>	
+//== Define an event handler function to extend Hype documents
+function extendHype(hypeDocument, element, event) {
+  //== Check if the custom CSS has already been added
+  if (typeof customCSSAdded == "undefined") {
+    customCSSAdded = false; //== Initialize the flag as false
+  }
+  
+  if (typeof hypeDocument.willAutoClose == "undefined") {
+    hypeDocument.willAutoClose = true; //== Initialize the flag as false
+  }
+  
+  
+  hypeDocument.descriptionAutoClose = function(e){
+  hypeDocument.willAutoClose = e;
+
+  }
+  
+  /* Version 1.0.2*/
+	/*
+	1.0.2
+	Fixed: new lines now show when used in the multi line text.
+	Added: When Show less is active it will have  0.5 opacity.
+	Added: When Show more/less now is italic font-style.
+	Included : Convenience function to call your description loader function on all scene loads. (see below)
+	
+	*/
+	
+  //== Define the setDescription function
+  //== @param {HTMLElement} descriptionElement - The HTML element to set up the description.
+  //== @param {string} fullText - The full text content for the description.
+  //== @param {Object} options - Optional arguments object.
+  //==   - splitTextAtWordNumber (number): Optional - The number of leading words to show.
+  //==   - leadingTextColor (string): Optional - Color for the leading summary text.
+  //==   - followingTextColor (string): Optional - Color for the following summary text.
+  //==   - fontSize (string): Optional - Font Size for the  text.
+  
+  
+
+/*
+//== Convenience function to call your description loader function on all scene loads. Place in head file. 
+//== The name of your description loader function in hype functions.
+
+var My_Description_Function_Name = 'YOUR_FUNCTION_NAME_MAKES_CALLS_TO_ALL_THE_hypeDocument.setDescription()_API_HERE'
+
+function loadDesc(hypeDocument, element, event) {hypeDocument.functions()[My_Description_Function_Name](hypeDocument, element, event);return true;} if ("HYPE_eventListeners" in window === false) {window.HYPE_eventListeners = Array();}window.HYPE_eventListeners.push({ "type": "HypeSceneLoad", "callback": loadDesc });
+*/
+
+
+  hypeDocument.setDescription = function (descriptionElement, fullText, options = {}) {
+    
+    
+    var defaultText = findElementTextOptions()// Will be black and 16px if not found
+    
+    const {
+      //== Defaults
+      acceptsAutoClose = false,
+      splitTextAtWordNumber = 20,
+      leadingTextColor = defaultText.defaultColor,
+      followingTextColor = defaultText.defaultColor,
+      fontSize=  defaultText.defaultSize
+    } = options;
+
+    //== Generate a unique summaryClass
+    const timestamp = Date.now() + Math.floor(Math.random() * 100) + 1; 
+    const summaryClass = `summary_${timestamp}`;
+    
+    //== Split the full text into words and create summaries
+     
+     //== space before break here is important. prevents extra word showing up.
+    const words = fullText.replace( /\n/g, " <br>" ).split( " " )
+   
+   //== construct the strings and fix break/new lines. The ::before string need slightly diferent format to work.
+    const sourceDescription_20 = words.slice(0, splitTextAtWordNumber).join(' ').replace( /\<br\>/g, "\n" ).replace( /\<b\>/g, "" ).replace( /\<\/b\>/g, "" )
+
+    
+    const sourceDescriptionMore = words.slice(splitTextAtWordNumber).join(' ').replace( /'<br>'/g, "\n" );
+    
+    console.log(sourceDescriptionMore)
+
+    //== Populate the descriptionElement with HTML
+    
+    
+   
+ /*  Check if disclosure element can be found.
+ Its scene may not have loaded yet */ 
+    const descriptionElement_child =  findElement()
+     
+    if (!descriptionElement_child){
+    console.error('Error', descriptionElement + " -not found, May be on another scene that has not loaded yet");
+    return;
+    }
+
+
+
+
+    descriptionElement_child.innerHTML = `
+      <details id="${summaryClass}" class="details_" data-autoclose="${acceptsAutoClose}">
+        <summary class="${summaryClass}" style="color: ${leadingTextColor}; font-size:${fontSize};"></summary>
+        <p class="def" style="color: ${followingTextColor};font-size:${fontSize};">${sourceDescriptionMore}</p>
+      </details>
+    `;
+
+    //== Store the leading summary text in a dataset attribute
+    descriptionElement_child.querySelector(`.${summaryClass}`).dataset.description = sourceDescription_20 + '  ';
+  
+// Add a click event listener to each <details> element
+//const allDetailsElements = document.querySelectorAll('.details_');
+
+
+
+var targetDetail = descriptionElement_child.querySelector(".details_");
+
+//==  Add a click event listener.
+targetDetail.addEventListener("click", (event) => {
+  
+  console.log(hypeDocument.willAutoClose ,targetDetail.dataset.autoclose)
+  if ( hypeDocument.willAutoClose && targetDetail.dataset.autoclose == 'true' ){
+  const details = document.querySelectorAll("details");
+
+  //==  Prevent the default toggle action
+  event.preventDefault();
+
+  //==  Keep the targetDetail open
+  //targetDetail.open = true;
+  
+   // Toggle the open state of the targetDetail
+  targetDetail.open = !targetDetail.open;
+
+
+  //==  Close all other details elements
+  details.forEach((detail) => {
+
+    if (detail !== targetDetail && detail.dataset.autoclose == 'true') {
+      detail.open = false;
+    }
+  });
+  }
+});
+
+
+ 
+ /*  Check if disclosure element can be found on this scene.
+ Its scene may not have loaded yet */  
+ function findElement() {
+    var missingElement = document.querySelector(`[data-id=${descriptionElement}][data-disclosure]` ) ||document.querySelector(`[data-id=${descriptionElement}] * > [data-disclosure]` )
+    
+    
+    if (!missingElement) return false;
+
+		return missingElement  
+}
+
+ function findElementTextOptions() {
+    var thisElement = document.querySelector(`[data-id=${descriptionElement}][data-disclosure]` ) ||document.querySelector(`[data-id=${descriptionElement}] * > [data-disclosure]` )
+    
+    
+   
+    
+    try {
+    var col = thisElement.style.color
+    var size = thisElement.style.fontSize
+     
+     }
+     catch {
+     return  {defaultColor:'black',defaultSize:'16px'}
+     }  
+ 
+		return {defaultColor:col,defaultSize:size}  
+}
+
+
+    //== Check if custom CSS has already been added
+    if (!customCSSAdded) {
+      
+      //== Create a style element for custom CSS
+      const styleElement = document.createElement('style');
+      styleElement.innerHTML = `
+        /* Details */
+        .details_ summary::before {
+          content: attr(data-description);
+          white-space: pre-wrap;
+          font-weight: bold;
+          padding: 1rem 2em 1rem 0;
+        }
+        .details_ summary::after {
+          content: "Show more...";
+          font-style: italic;
+        }
+        .details_[open] summary::after {
+          content: "Show less..";
+          opacity: 0.5
+        }
+        [data-disclosure] {
+          height: auto!important;
+        }
+      `;
+
+      //== Add the style element to the head of the document
+      document.head.appendChild(styleElement);
+
+      //== Set the flag to true to indicate that custom CSS has been added
+      customCSSAdded = true;
+    }
+  }
+
+  return true;
+}
+
+//== Check if HYPE_eventListeners is defined, if not, create an empty array
+if ("HYPE_eventListeners" in window === false) {
+  window.HYPE_eventListeners = Array();
+}
+
+//== Add a listener for the "HypeDocumentLoad" event that calls the extendHype function
+window.HYPE_eventListeners.push({ "type": "HypeDocumentLoad", "callback": extendHype });
+
+
+
+</script>
+
+	
+
+	<!-- end copy -->
+  </head>
+  <body>
+	<!-- copy these lines to your document: -->
+
+	<div id="index_hype_container" class="HYPE_document" style="margin:auto;position:relative;width:1200px;height:980px;overflow:hidden;">
+		<script type="text/javascript" charset="utf-8" src="index.hyperesources/index_hype_generated_script.js?36976"></script>
+	</div>
+
+	<!-- end copy -->
+  </body>
+</html>
