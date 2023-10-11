@@ -15,18 +15,18 @@ The image  path is passed in via the constructor.
 We also have are not  using the **::before ** **content in this custom version to place the** **leadingText**.  This is now a `<p>` block.
 
 The leadingText  path is passed in via the constructor, and placed in the `<p>` block directly.
-
- `  descriptionElement_child.innerHTML = 
+```
+   descriptionElement_child.innerHTML = `
 <div class=“_wrap”>  <img src=“${image_}” alt=“Girl in a jacket” style=“clip-path: circle(50%); shape-outside:circle(39%);  box-sizing: border-box; margin-right:3rem; float:left;width:100px; height:auto;”> <p class=“def” style=“color: ${leadingTextColor};font-size:${fontSize}; word-wrap: break-word;white-space: pre-line;padding-left:20px;”>${sourceDescription_20}</p>
 
  </div>
 
-      ```
+    
       <details  id="${summaryClass}" class="details_" data-autoclose="${acceptsAutoClose}">
         <summary class="${summaryClass}" style=";float:right;color: ${leadingTextColor}; font-size:${fontSize};"></summary>
         <p class="def" style="color: ${followingTextColor};font-size:${fontSize};">${sourceDescriptionMore}</p>
-      </details>
-    ;```
+      </details>`;
+ ```
 
  In the  load() , we  take all the text (objects)  that need to go into this area and calculate the word count simply using split. We then pass that in as the  **splitTextAtWordNumber** so we only have the correct text go into the ::after as the followingText.
 There are also additions and deletions in the CSS blocks to adjust all of the above. Along with some inline styling for the image.
